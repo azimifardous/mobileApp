@@ -5,6 +5,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import HomeScreen from './screens/HomeScreen';
 import { useFonts } from 'expo-font';
+import StaffDirectoryScreen from './screens/StaffDirectory';
+import HrScreen from './screens/HrScreen'
+import Intranet from './screens/IntranetScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,10 +31,10 @@ export default function App() {
         }
       }} initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        {/* <Stack.Screen name="Directory" component={StaffDirectory} />
-        <Stack.Screen name="Profile" component={StaffProfile} />
-        <Stack.Screen name="HR Requests" component={HRRequests} />
-        <Stack.Screen name="Intranet" component={Intranet} /> */}
+        <Stack.Screen name="StaffDirectory" component={StaffDirectoryScreen} />
+        <Stack.Screen name="HR" component={HrScreen} />
+        <Stack.Screen name="Intranet" component={Intranet} />
+        {/* <Stack.Screen name="Profile" component={StaffProfile} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
