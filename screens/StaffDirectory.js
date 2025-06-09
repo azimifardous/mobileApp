@@ -1,10 +1,101 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import { SearchBar } from '@rneui/themed';
+
+
 export default function StaffDirectoryScreen({ navigation }) {
     const route = useRoute();
     console.log('Current route:', route.name);
+    const [search, setSearch] = useState("");
+
+    const updateSearch = (search) => {
+        setSearch(search);
+    };
+
     return (<View style={styles.container}>
+        {/* Top Section */}
+        <View>
+            <Text style={styles.header}>Staff Directory</Text>
+
+            <SearchBar
+                platform="android"
+                containerStyle={styles.searchBarContainer}
+                inputContainerStyle={{}}
+                inputStyle={{ fontFamily: "Trebuc MS", fontSize: 16, color: "#000" }}
+                leftIconContainerStyle={{}}
+                rightIconContainerStyle={{}}
+                onChangeText={setSearch}
+                placeholder="Search Anything..."
+                placeholderTextColor="#888"
+                cancelButtonTitle="Cancel"
+                value={search}
+            />
+        </View>
+        {/* Main Content */}
+        <ScrollView>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.card}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>John Smith</Text>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
+                        </View>
+                    </View>
+                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.card}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Linda Carter</Text>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
+                        </View>
+                    </View>
+                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.card}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Emma Bailey</Text>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
+                        </View>
+                    </View>
+                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.card}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Robert Shaw</Text>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Finance</Text>
+                        </View>
+                    </View>
+                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.card}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Mark White</Text>
+                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Finance</Text>
+                        </View>
+                    </View>
+                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                </View>
+            </TouchableOpacity>
+
+        </ScrollView >
         {/* Bottom Section */}
         < View style={styles.bottomNav} >
             <TouchableOpacity style={[
@@ -20,7 +111,7 @@ export default function StaffDirectoryScreen({ navigation }) {
                 <Image source={require('../assets/icons/staff.png')} style={styles.navIcon} />
                 {styles.navItemActive && <Text style={{ color: "#fff", marginLeft: 5, fontSize: 12, fontFamily: "Trebuc MS" }}>Staff</Text>}
             </TouchableOpacity>
-            <TouchableOpacity style={[
+            <TouchableOpacity onPress={() => navigation.navigate('HR')} style={[
                 styles.navItem,
                 route.name === 'HR' && styles.navItemActive
             ]} >
@@ -40,6 +131,38 @@ const styles = StyleSheet.create({
         padding: 20,
 
     },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        fontSize: 28,
+        color: '#941A1D',
+        fontFamily: "Trebuc Bold"
+    },
+
+    searchBarContainer: {
+        backgroundColor: '#d9d9d9',
+        borderRadius: 25,
+        paddingHorizontal: 10,
+        marginBottom: 10,
+    },
+    card: {
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexDirection: 'row',
+        marginVertical: 10,
+        paddingHorizontal: 20,
+        height: 80,
+        backgroundColor: '#d9d9d9',
+        borderRadius: 25
+    },
+
+    profileIcon: {
+        width: 50,
+        height: 50,
+    },
+
     bottomNav: {
         position: 'absolute',
         height: 85,
