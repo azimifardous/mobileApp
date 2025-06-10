@@ -6,6 +6,7 @@ import {
 import { useRoute } from '@react-navigation/native';
 import { SearchBar } from '@rneui/themed';
 
+
 export default function StaffDirectoryScreen({ navigation }) {
     const [search, setSearch] = useState('');
     const [modalVisible, setModalVisible] = useState(false);

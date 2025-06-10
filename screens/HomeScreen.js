@@ -11,9 +11,7 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.welcome}>Welcome, John Doe</Text>
                     <Text style={styles.subtitle}>What would you like to do today?</Text>
                 </View>
-                <TouchableOpacity>
-                    <Image source={require('../assets/icons/profile.png')} style={styles.profileIcon} />
-                </TouchableOpacity>
+                <Image source={require('../assets/icons/profile.png')} style={styles.profileIcon} />
             </View>
             {/* Main Content */}
             <ScrollView>

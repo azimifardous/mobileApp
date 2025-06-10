@@ -1,48 +1,191 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import React, { useState } from 'react';
+import { TouchableWithoutFeedback } from 'react-native';
 export default function ProfileScreen({ route }) {
     const navigation = useNavigation();
-    const { staff } = route.params;
+    const { staff, setStaffData, staffData } = route.params;
+
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editedStaff, setEditedStaff] = useState(staff);
+
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.navigate("Directory")} style={styles.backButton}>
-                <Text style={styles.backIcon}>←</Text>
-            </TouchableOpacity>
-            {/* Top Section */}
-            <View style={styles.topSection}>
-                <Image source={require('../assets/icons/user.png')} style={styles.avatar} />
-                <Text style={styles.name}>{staff.name}</Text>
-                <Text style={styles.department}>{staff.department}</Text>
-                <Text style={styles.reportsTo}>Reports to Carol White</Text>
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={() => navigation.navigate("Directory")} style={styles.backButton}>
+                    <Text style={styles.backIcon}>←</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)} style={styles.moreButton}>
+                    <Text style={styles.moreIcon}>⋮</Text>
+                </TouchableOpacity>
+                {menuVisible && (
+                    <View style={styles.dropdownMenu}>
+                        <TouchableOpacity onPress={() => {
+                            setMenuVisible(false);
+                            setEditModalVisible(true);
+                        }}>
+                            <Text style={styles.dropdownItem}>Edit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => {
+                            Alert.alert(
+                                "Delete Staff",
+                                `Are you sure you want to delete ${staff.name}?`,
+                                [
+                                    { text: "Cancel", style: "cancel" },
+                                    {
+                                        text: "Delete", style: "destructive", onPress: () => {
+                                            const updatedList = staffData.filter(item => item.id !== staff.id);
+                                            setStaffData(updatedList);
+                                            navigation.goBack();
+                                        }
+                                    }
+                                ]
+                            );
+                        }}>
+                            <Text style={[styles.dropdownItem, { color: 'red' }]}>Delete</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                <Modal
+                    visible={editModalVisible}
+                    animationType="fade"
+                    transparent={true}
+                    onRequestClose={() => setEditModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity
+                                onPress={() => setEditModalVisible(false)}
+                                style={styles.closeButton}
+                            >
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Edit Staff</Text>
+                            <TextInput
+                                placeholder="Full Name"
+                                value={editedStaff.name}
+                                onChangeText={(text) => setEditedStaff({ ...editedStaff, name: text })}
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="Phone Number"
+                                value={editedStaff.phone}
+                                onChangeText={(text) => setEditedStaff({ ...editedStaff, phone: text })}
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="Department"
+                                value={editedStaff.department}
+                                onChangeText={(text) => setEditedStaff({ ...editedStaff, department: text })}
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="Street"
+                                value={editedStaff.address?.street || ''}
+                                onChangeText={(text) =>
+                                    setEditedStaff({
+                                        ...editedStaff,
+                                        address: { ...editedStaff.address, street: text },
+                                    })
+                                }
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="City"
+                                value={editedStaff.address?.city || ''}
+                                onChangeText={(text) =>
+                                    setEditedStaff({
+                                        ...editedStaff,
+                                        address: { ...editedStaff.address, city: text },
+                                    })
+                                }
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="State"
+                                value={editedStaff.address?.state || ''}
+                                onChangeText={(text) =>
+                                    setEditedStaff({
+                                        ...editedStaff,
+                                        address: { ...editedStaff.address, state: text },
+                                    })
+                                }
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="ZIP Code"
+                                value={editedStaff.address?.zip || ''}
+                                onChangeText={(text) =>
+                                    setEditedStaff({
+                                        ...editedStaff,
+                                        address: { ...editedStaff.address, zip: text },
+                                    })
+                                }
+                                style={styles.input}
+                            />
+                            <TextInput
+                                placeholder="Country"
+                                value={editedStaff.address?.country || ''}
+                                onChangeText={(text) =>
+                                    setEditedStaff({
+                                        ...editedStaff,
+                                        address: { ...editedStaff.address, country: text },
+                                    })
+                                }
+                                style={styles.input}
+                            />
+                            <TouchableOpacity
+                                style={styles.saveButton}
+                                onPress={() => {
+                                    const updated = staffData.map(item =>
+                                        item.id === staff.id ? editedStaff : item
+                                    );
+                                    setStaffData(updated);
+                                    setEditModalVisible(false);
+                                    navigation.goBack();
+                                }}
+                            >
+                                <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+                {/* Top Section */}
+                <View style={styles.topSection}>
+                    <Image source={require('../assets/icons/user.png')} style={styles.avatar} />
+                    <Text style={styles.name}>{staff.name}</Text>
+                    <Text style={styles.department}>{staff.department}</Text>
+                    <Text style={styles.reportsTo}>Reports to Carol White</Text>
+                </View>
+                {/* Contact Details Card */}
+                <View style={styles.detailsCard}>
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.actionButton}>
+                            <Text style={styles.buttonText}>Call</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionButton}>
+                            <Text style={styles.buttonText}>Email</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.detailItem}>
+                        <Image source={require('../assets/icons/phone.png')} style={styles.detailIcon} />
+                        <Text style={styles.detailText}>{staff.phone}</Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                        <Image source={require('../assets/icons/mail.png')} style={styles.detailIcon} />
+                        <Text style={styles.detailText}>{staff.name.toLowerCase().replace(' ', '.')}@gelosmail.com</Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                        <Image source={require('../assets/icons/location.png')} style={styles.detailIcon} />
+                        <Text style={styles.detailText}>
+                            {staff.address.street}, {staff.address.city}, {staff.address.state} {staff.address.zip}, {staff.address.country}
+                        </Text>
+                    </View>
+                </View>
             </View>
-            {/* Contact Details Card */}
-            <View style={styles.detailsCard}>
-                <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.buttonText}>Call</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.buttonText}>Email</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.detailItem}>
-                    <Image source={require('../assets/icons/phone.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText}>{staff.phone}</Text>
-                </View>
-                <View style={styles.detailItem}>
-                    <Image source={require('../assets/icons/mail.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText}>{staff.name.toLowerCase().replace(' ', '.')}@gelosmail.com</Text>
-                </View>
-                <View style={styles.detailItem}>
-                    <Image source={require('../assets/icons/location.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText}>
-                        {staff.address.street}, {staff.address.city}, {staff.address.state} {staff.address.zip}, {staff.address.country}
-                    </Text>
-                </View>
-            </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 }
 
@@ -146,6 +289,83 @@ const styles = StyleSheet.create({
         fontSize: 40,
         color: '#000',
         fontFamily: 'Trebuc MS',
+    },
+    moreButton: {
+        position: 'absolute',
+        top: 80,
+        right: 20,
+        zIndex: 10,
+    },
+    moreIcon: {
+        fontSize: 26,
+        color: '#000',
+    },
+    dropdownMenu: {
+        position: 'absolute',
+        top: 70,
+        right: 20,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        elevation: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        zIndex: 20,
+    },
+    dropdownItem: {
+        fontSize: 16,
+        fontFamily: 'Trebuc MS',
+        marginVertical: 5,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 20,
+        width: '80%',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontFamily: 'Trebuc MS',
+        marginBottom: 10,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 10,
+        fontFamily: 'Trebuc MS',
+        marginBottom: 10,
+    },
+    saveButton: {
+        backgroundColor: '#941A1D',
+        padding: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontFamily: 'Trebuc MS',
+        fontSize: 16,
+    },
+
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 10,
+        padding: 5,
+    },
+
+    closeButtonText: {
+        fontSize: 22,
+        color: '#941A1D',
+        fontWeight: 'bold',
     }
+
 
 });
