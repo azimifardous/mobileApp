@@ -1,12 +1,8 @@
 // screens/HomeScreen.js
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
 
 
 export default function HomeScreen({ navigation }) {
-    const route = useRoute();
-    console.log('Current route:', route.name);
     return (
         <View style={styles.container}>
             {/* Top Section */}
@@ -30,7 +26,7 @@ export default function HomeScreen({ navigation }) {
                         </View>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('StaffDirectory')}>
+                <TouchableOpacity onPress={() => navigation.navigate('Directory')}>
                     <View style={styles.card}>
                         <Image source={require('../assets/icons/staffDirectory.png')} style={{ width: 50, height: 50 }} />
                         <Text style={{ fontFamily: "Trebuc MS", fontSize: 16 }}>Staff Directory</Text>
@@ -49,31 +45,6 @@ export default function HomeScreen({ navigation }) {
                     </View>
                 </TouchableOpacity>
             </ScrollView>
-            {/* Bottom Section */}
-            <View style={styles.bottomNav}>
-                <TouchableOpacity style={[
-                    styles.navItem,
-                    route.name === 'Home' && styles.navItemActive
-                ]} >
-                    <Image source={require('../assets/icons/home.png')} style={styles.navIcon} />
-                    {styles.navItemActive && <Text style={{ color: "#fff", marginLeft: 5, fontSize: 12, fontFamily: "Trebuc MS" }}>Home</Text>}
-                </TouchableOpacity>
-                <TouchableOpacity style={[
-                    styles.navItem,
-                    route.name === 'StaffDirectory' && styles.navItemActive
-                ]} onPress={() => navigation.navigate('StaffDirectory')}>
-                    <Image source={require('../assets/icons/staff.png')} style={styles.navIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('HR')} style={[
-                    styles.navItem,
-                    route.name === 'HR' && styles.navItemActive
-                ]} >
-                    <Image source={require('../assets/icons/hr.png')} style={styles.navIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Image source={require('../assets/icons/menu.png')} style={styles.navIcon} />
-                </TouchableOpacity>
-            </View>
         </View >
     );
 }
@@ -81,6 +52,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        marginTop: 50,
         backgroundColor: '#ffffff',
         padding: 20,
 
@@ -142,38 +114,4 @@ const styles = StyleSheet.create({
         fontFamily: "Trebuc MS",
         height: 110,
     },
-    bottomNav: {
-        position: 'absolute',
-        height: 85,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#262626',
-        paddingBottom: 20,
-        paddingTop: 12,
-        paddingHorizontal: 24,
-
-    },
-    navIcon: {
-        width: 25,
-        height: 25,
-    },
-
-    navItem: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
-
-    },
-
-    navItemActive: {
-        backgroundColor: '#595959',
-        borderRadius: 20,
-        width: 86,
-        padding: 10,
-    },
-
 });

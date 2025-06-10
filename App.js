@@ -1,15 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
 import { useFonts } from 'expo-font';
 import StaffDirectoryScreen from './screens/StaffDirectory';
 import HrScreen from './screens/HrScreen'
 import Intranet from './screens/IntranetScreen';
+import CustomTabBar from './components/CustomTabBar';
+import ProfileScreen from './screens/ProfileScreen';
 
-const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -24,28 +24,14 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{
-        headerTitleStyle: {
-          fontFamily: 'Trebuc MS',
-          fontSize: 20,
-        }
-      }} initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="StaffDirectory" component={StaffDirectoryScreen} />
-        <Stack.Screen name="HR" component={HrScreen} />
-        <Stack.Screen name="Intranet" component={Intranet} />
-        {/* <Stack.Screen name="Profile" component={StaffProfile} /> */}
-      </Stack.Navigator>
+      <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{ headerShown: false }}>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Directory" component={StaffDirectoryScreen} />
+        <Tab.Screen name="HR" component={HrScreen} />
+        <Tab.Screen name="Intranet" component={Intranet} />
+        <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarButton: () => null }} />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-});

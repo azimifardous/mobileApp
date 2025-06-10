@@ -1,131 +1,208 @@
-import React, { Component, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import {
+    View, Text, StyleSheet, TouchableOpacity, Image,
+    ScrollView, Modal, TextInput
+} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { SearchBar } from '@rneui/themed';
 
-
 export default function StaffDirectoryScreen({ navigation }) {
-    const route = useRoute();
-    console.log('Current route:', route.name);
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [department, setDepartment] = useState('');
+    const [street, setStreet] = useState('');
+    const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+    const [zip, setZip] = useState('');
+    const [country, setCountry] = useState('');
+    const [staffData, setStaffData] = useState([
+        {
+            id: 1,
+            name: 'John Smith',
+            phone: '0411 111 111',
+            department: 'Marketing',
+            address: {
+                street: '1 Code Lane',
+                city: 'Javaville',
+                state: 'NSW',
+                zip: '0100',
+                country: 'Australia'
+            }
+        },
+        {
+            id: 2,
+            name: 'Linda Carter',
+            phone: '0412 222 222',
+            department: 'Marketing',
+            address: {
+                street: '16 Bit Way',
+                city: 'Byte Cove',
+                state: 'QLD',
+                zip: '1101',
+                country: 'Australia'
+            }
+        },
+        {
+            id: 3,
+            name: 'Emma Bailey',
+            phone: '0413 333 333',
+            department: 'Marketing',
+            address: {
+                street: '8 Silicon Road',
+                city: 'Cloud Hills',
+                state: 'VIC',
+                zip: '1001',
+                country: 'Australia'
+            }
+        },
+        {
+            id: 4,
+            name: 'Robert Shaw',
+            phone: '0414 444 444',
+            department: 'Finance',
+            address: {
+                street: '4 Processor Boulevard',
+                city: 'Appletson',
+                state: 'NT',
+                zip: '1010',
+                country: 'Australia'
+            }
+        },
+        {
+            id: 5,
+            name: 'Mark White',
+            phone: '0415 555 555',
+            department: 'Finance',
+            address: {
+                street: '700 Bandwidth Street',
+                city: 'Bufferland',
+                state: 'NSW',
+                zip: '0110',
+                country: 'Australia'
+            }
+        }
+    ]);
 
-    const updateSearch = (search) => {
-        setSearch(search);
+
+    const filteredStaff = staffData.filter((staff) =>
+        staff.name.toLowerCase().includes(search.toLowerCase()) ||
+        staff.department.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const handleAddStaff = () => {
+        const newStaff = {
+            id: Date.now(),
+            name,
+            phone,
+            department,
+            address: {
+                street,
+                city,
+                state,
+                zip,
+                country,
+            }
+        };
+
+        setStaffData([...staffData, newStaff]);
+        setModalVisible(false);
+
+        // Clear form fields
+        setName('');
+        setPhone('');
+        setDepartment('');
+        setStreet('');
+        setCity('');
+        setState('');
+        setZip('');
+        setCountry('');
     };
 
-    return (<View style={styles.container}>
-        {/* Top Section */}
-        <View>
-            <Text style={styles.header}>Staff Directory</Text>
 
-            <SearchBar
-                platform="android"
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{}}
-                inputStyle={{ fontFamily: "Trebuc MS", fontSize: 16, color: "#000" }}
-                leftIconContainerStyle={{}}
-                rightIconContainerStyle={{}}
-                onChangeText={setSearch}
-                placeholder="Search Anything..."
-                placeholderTextColor="#888"
-                cancelButtonTitle="Cancel"
-                value={search}
-            />
+    return (
+        <View style={styles.container}>
+            {/* Top Section */}
+            <View>
+                <Text style={styles.header}>Staff Directory</Text>
+
+                <SearchBar
+                    platform="android"
+                    containerStyle={styles.searchBarContainer}
+                    inputStyle={{ fontFamily: "Trebuc MS", fontSize: 16, color: "#000" }}
+                    placeholder="Search Anything..."
+                    placeholderTextColor="#888"
+                    value={search}
+                    onChangeText={setSearch}
+                />
+            </View>
+
+            {/* Main Content */}
+            <ScrollView>
+                {filteredStaff.map((staff) => (
+                    <TouchableOpacity key={staff.id} onPress={() => navigation.navigate('Profile', { staff })}>
+                        <View style={styles.card}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
+                                <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                                    <Text style={styles.staffName}>{staff.name}</Text>
+                                    <Text style={styles.staffDept}>{staff.department}</Text>
+                                </View>
+                            </View>
+                            <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
+                        </View>
+                    </TouchableOpacity>
+                ))}
+
+                {filteredStaff.length === 0 && (
+                    <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
+                        No matching staff found.
+                    </Text>
+                )}
+                <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                    <Text style={styles.addButtonText}>+ Add Staff</Text>
+                </TouchableOpacity>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Add New Staff</Text>
+
+                            <TextInput placeholder="Full Name" placeholderTextColor={"#595959"} value={name} onChangeText={setName} style={styles.input} />
+                            <TextInput placeholder="Phone Number" placeholderTextColor={"#595959"} value={phone} onChangeText={setPhone} style={styles.input} />
+                            <TextInput placeholder="Department" placeholderTextColor={"#595959"} value={department} onChangeText={setDepartment} style={styles.input} />
+                            <TextInput placeholder="Street Address" placeholderTextColor={"#595959"} value={street} onChangeText={setStreet} style={styles.input} />
+                            <TextInput placeholder="City" placeholderTextColor={"#595959"} value={city} onChangeText={setCity} style={styles.input} />
+                            <TextInput placeholder="State" placeholderTextColor={"#595959"} value={state} onChangeText={setState} style={styles.input} />
+                            <TextInput placeholder="ZIP Code" placeholderTextColor={"#595959"} value={zip} onChangeText={setZip} style={styles.input} />
+                            <TextInput placeholder="Country" placeholderTextColor={"#595959"} value={country} onChangeText={setCountry} style={styles.input} />
+
+                            <TouchableOpacity style={styles.saveButton} onPress={handleAddStaff}>
+                                <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            </ScrollView>
         </View>
-        {/* Main Content */}
-        <ScrollView>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <View style={styles.card}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>John Smith</Text>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
-                        </View>
-                    </View>
-                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <View style={styles.card}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Linda Carter</Text>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
-                        </View>
-                    </View>
-                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <View style={styles.card}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Emma Bailey</Text>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Marketing</Text>
-                        </View>
-                    </View>
-                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <View style={styles.card}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Robert Shaw</Text>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Finance</Text>
-                        </View>
-                    </View>
-                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <View style={styles.card}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 20, marginLeft: 10 }}>Mark White</Text>
-                            <Text style={{ fontFamily: "Trebuc MS", fontSize: 14, marginLeft: 10, color: "#595959" }}>Finance</Text>
-                        </View>
-                    </View>
-                    <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
-                </View>
-            </TouchableOpacity>
-
-        </ScrollView >
-        {/* Bottom Section */}
-        < View style={styles.bottomNav} >
-            <TouchableOpacity style={[
-                styles.navItem,
-                route.name === 'Home' && styles.navItemActive
-            ]} onPress={() => navigation.navigate('Home')}>
-                <Image source={require('../assets/icons/home.png')} style={styles.navIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity style={[
-                styles.navItem,
-                route.name === 'StaffDirectory' && styles.navItemActive
-            ]} onPress={() => navigation.navigate('StaffDirectory')}>
-                <Image source={require('../assets/icons/staff.png')} style={styles.navIcon} />
-                {styles.navItemActive && <Text style={{ color: "#fff", marginLeft: 5, fontSize: 12, fontFamily: "Trebuc MS" }}>Staff</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('HR')} style={[
-                styles.navItem,
-                route.name === 'HR' && styles.navItemActive
-            ]} >
-                <Image source={require('../assets/icons/hr.png')} style={styles.navIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-                <Image source={require('../assets/icons/menu.png')} style={styles.navIcon} />
-            </TouchableOpacity>
-        </View >
-    </View>)
+    );
 }
+
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 50,
         flex: 1,
         backgroundColor: '#ffffff',
         padding: 20,
@@ -163,38 +240,90 @@ const styles = StyleSheet.create({
         height: 50,
     },
 
-    bottomNav: {
-        position: 'absolute',
-        height: 85,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#262626',
-        paddingBottom: 20,
-        paddingTop: 12,
+    staffName: {
+        fontFamily: "Trebuc MS",
+        fontSize: 20,
+        marginLeft: 10,
+    },
+    staffDept: {
+        fontFamily: "Trebuc MS",
+        fontSize: 14,
+        marginLeft: 10,
+        color: "#595959"
+    },
+    addButton: {
+        backgroundColor: '#941A1D',
+        paddingVertical: 12,
         paddingHorizontal: 24,
-
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 10,
+        alignSelf: 'center',
     },
-    navIcon: {
-        width: 25,
-        height: 25,
-    },
 
-    navItem: {
+    addButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontFamily: 'Trebuc MS',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        flexDirection: 'row',
-
     },
 
-    navItemActive: {
-        backgroundColor: '#595959',
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
         borderRadius: 20,
-        width: 86,
-        padding: 10,
+        padding: 20,
+        elevation: 5,
     },
+
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        fontFamily: 'Trebuc MS',
+        color: '#941A1D'
+    },
+
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+        fontFamily: 'Trebuc MS',
+    },
+
+    saveButton: {
+        backgroundColor: '#941A1D',
+        padding: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+
+    saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontFamily: 'Trebuc MS',
+    },
+
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 8,
+        zIndex: 10,
+    },
+
+    closeButtonText: {
+        fontSize: 20,
+        color: '#941A1D',
+        fontWeight: 'bold',
+    }
 
 });
