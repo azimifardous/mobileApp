@@ -1,13 +1,35 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
     View, Text, StyleSheet, TouchableOpacity, Image,
     ScrollView, Modal, TextInput
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { SearchBar } from '@rneui/themed';
+import api from '../services/api';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 
-export default function StaffDirectoryScreen({ navigation }) {
+export default function StaffDirectoryScreen({ navigation, route }) {
+    useFocusEffect(
+        React.useCallback(() => {
+            refreshStaffList();
+        }, [])
+    );
+    useEffect(() => {
+        api.get('/staff')
+            .then(response => {
+                setStaffData(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching staff data:', error);
+            });
+
+        api.get('department')
+            .then(res => setDepartments(res.data))
+            .catch(err => console.error('Error fetching departments:', err));
+    }, []);
+
     const [search, setSearch] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [name, setName] = useState('');
@@ -15,111 +37,73 @@ export default function StaffDirectoryScreen({ navigation }) {
     const [department, setDepartment] = useState('');
     const [street, setStreet] = useState('');
     const [city, setCity] = useState('');
+    const [departments, setDepartments] = useState([]);
     const [state, setState] = useState('');
     const [zip, setZip] = useState('');
     const [country, setCountry] = useState('');
-    const [staffData, setStaffData] = useState([
-        {
-            id: 1,
-            name: 'John Smith',
-            phone: '0411 111 111',
-            department: 'Marketing',
-            address: {
-                street: '1 Code Lane',
-                city: 'Javaville',
-                state: 'NSW',
-                zip: '0100',
-                country: 'Australia'
-            }
-        },
-        {
-            id: 2,
-            name: 'Linda Carter',
-            phone: '0412 222 222',
-            department: 'Marketing',
-            address: {
-                street: '16 Bit Way',
-                city: 'Byte Cove',
-                state: 'QLD',
-                zip: '1101',
-                country: 'Australia'
-            }
-        },
-        {
-            id: 3,
-            name: 'Emma Bailey',
-            phone: '0413 333 333',
-            department: 'Marketing',
-            address: {
-                street: '8 Silicon Road',
-                city: 'Cloud Hills',
-                state: 'VIC',
-                zip: '1001',
-                country: 'Australia'
-            }
-        },
-        {
-            id: 4,
-            name: 'Robert Shaw',
-            phone: '0414 444 444',
-            department: 'Finance',
-            address: {
-                street: '4 Processor Boulevard',
-                city: 'Appletson',
-                state: 'NT',
-                zip: '1010',
-                country: 'Australia'
-            }
-        },
-        {
-            id: 5,
-            name: 'Mark White',
-            phone: '0415 555 555',
-            department: 'Finance',
-            address: {
-                street: '700 Bandwidth Street',
-                city: 'Bufferland',
-                state: 'NSW',
-                zip: '0110',
-                country: 'Australia'
-            }
-        }
-    ]);
+    const [staffData, setStaffData] = useState([]);
+
+
 
 
     const filteredStaff = staffData.filter((staff) =>
         staff.name.toLowerCase().includes(search.toLowerCase()) ||
-        staff.department.toLowerCase().includes(search.toLowerCase())
+        staff.department.name.toLowerCase().includes(search.toLowerCase())
     );
 
     const handleAddStaff = () => {
+        if (!name || !phone || !department || !street || !city || !state || !zip || !country) {
+            alert('Please fill all required fields');
+            return;
+        }
+
+        const departmentId = departments.find(dep => dep.name === department)?.id;
+
+        if (!departmentId) {
+            alert('Invalid department selected');
+            return;
+        }
+
         const newStaff = {
-            id: Date.now(),
             name,
             phone,
-            department,
-            address: {
-                street,
-                city,
-                state,
-                zip,
-                country,
-            }
+            departmentId,
+            street,
+            city,
+            state,
+            zip,
+            country,
         };
 
-        setStaffData([...staffData, newStaff]);
-        setModalVisible(false);
+        console.log('Adding new staff:', newStaff);
 
-        // Clear form fields
-        setName('');
-        setPhone('');
-        setDepartment('');
-        setStreet('');
-        setCity('');
-        setState('');
-        setZip('');
-        setCountry('');
+        api.post('staff', newStaff)
+            .then(res => {
+                console.log('Staff saved:', res.data);
+                setModalVisible(false);
+                refreshStaffList();
+
+                setName('');
+                setPhone('');
+                setDepartment('');
+                setStreet('');
+                setCity('');
+                setState('');
+                setZip('');
+                setCountry('');
+            })
+            .catch(err => {
+                console.error('Error saving staff:', err);
+                alert('Failed to add staff');
+            });
     };
+
+    const refreshStaffList = () => {
+        api.get('staff')
+            .then(res => setStaffData(res.data))
+            .catch(err => console.error('Error refreshing staff:', err));
+    };
+
 
 
     return (
@@ -139,7 +123,7 @@ export default function StaffDirectoryScreen({ navigation }) {
                 />
             </View>
 
-            {/* Main Content */}
+            {/* Main Content */}``
             <ScrollView>
                 {filteredStaff.map((staff) => (
                     <TouchableOpacity key={staff.id} onPress={() => navigation.navigate('Profile', { staff })}>
@@ -148,7 +132,7 @@ export default function StaffDirectoryScreen({ navigation }) {
                                 <Image source={require('../assets/icons/user.png')} style={styles.profileIcon} />
                                 <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
                                     <Text style={styles.staffName}>{staff.name}</Text>
-                                    <Text style={styles.staffDept}>{staff.department}</Text>
+                                    <Text style={styles.staffDept}>{staff.department.name}</Text>
                                 </View>
                             </View>
                             <Image source={require('../assets/icons/arrow.png')} style={{ width: 20, height: 20, marginLeft: 10 }} />
@@ -248,7 +232,7 @@ const styles = StyleSheet.create({
     },
     staffDept: {
         fontFamily: "Trebuc MS",
-        fontSize: 14,
+        fontSize: 12,
         marginLeft: 10,
         color: "#595959"
     },
@@ -325,6 +309,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#941A1D',
         fontWeight: 'bold',
+    },
+    picker: {
+        backgroundColor: '#eee',
+        marginVertical: 10,
+        borderRadius: 8,
     }
 
 });

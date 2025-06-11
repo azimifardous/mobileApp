@@ -1,14 +1,53 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableWithoutFeedback } from 'react-native';
+import api from '../services/api';
+//  file for API calls
 export default function ProfileScreen({ route }) {
     const navigation = useNavigation();
-    const { staff, setStaffData, staffData } = route.params;
+    const { staff } = route.params;
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editedStaff, setEditedStaff] = useState(staff);
+    const [departments, setDepartments] = useState([]);
+
+    useEffect(() => {
+        setEditedStaff(staff);
+        api.get('department')
+            .then(res => setDepartments(res.data))
+            .catch(err => console.error('Error fetching departments:', err));
+    }, [staff])
+
+    const handleEditSave = () => {
+        const departmentId = departments.find(dep => dep.name === editedStaff.department)?.id || editedStaff.department.id;
+
+        const updatedStaff = {
+            name: editedStaff.name,
+            phone: editedStaff.phone,
+            street: editedStaff.street,
+            city: editedStaff.city,
+            state: editedStaff.state,
+            zip: editedStaff.zip,
+            country: editedStaff.country,
+            id: editedStaff.id,
+            departmentId: departmentId,
+        };
+
+
+        api.put(`staff/${updatedStaff.id}`, updatedStaff)
+            .then(res => {
+                alert("Staff updated successfully");
+                setEditModalVisible(false);
+                navigation.navigate("Directory", {
+                    updated: true
+                });
+            })
+            .catch(err => {
+                alert("Failed to update staff");
+            });
+    }
 
 
     return (
@@ -31,14 +70,19 @@ export default function ProfileScreen({ route }) {
                         <TouchableOpacity onPress={() => {
                             Alert.alert(
                                 "Delete Staff",
-                                `Are you sure you want to delete ${staff.name}?`,
+                                `Are you sure you want to delete ${editedStaff.name}?`,
                                 [
                                     { text: "Cancel", style: "cancel" },
                                     {
                                         text: "Delete", style: "destructive", onPress: () => {
-                                            const updatedList = staffData.filter(item => item.id !== staff.id);
-                                            setStaffData(updatedList);
-                                            navigation.goBack();
+                                            api.delete(`staff/${editedStaff.id}`)
+                                                .then(() => {
+                                                    alert(`${editedStaff.name} has been deleted.`);
+                                                    navigation.navigate("Directory", { deleted: true });
+                                                })
+                                                .catch((err) => {
+                                                    alert("Failed to delete staff");
+                                                });
                                         }
                                     }
                                 ]
@@ -77,75 +121,68 @@ export default function ProfileScreen({ route }) {
                             />
                             <TextInput
                                 placeholder="Department"
-                                value={editedStaff.department}
+                                value={editedStaff.department.name}
                                 onChangeText={(text) => setEditedStaff({ ...editedStaff, department: text })}
                                 style={styles.input}
                             />
                             <TextInput
                                 placeholder="Street"
-                                value={editedStaff.address?.street || ''}
+                                value={editedStaff.street || ''}
                                 onChangeText={(text) =>
                                     setEditedStaff({
                                         ...editedStaff,
-                                        address: { ...editedStaff.address, street: text },
+                                        street: text,
                                     })
                                 }
                                 style={styles.input}
                             />
                             <TextInput
                                 placeholder="City"
-                                value={editedStaff.address?.city || ''}
+                                value={editedStaff.city || ''}
                                 onChangeText={(text) =>
                                     setEditedStaff({
                                         ...editedStaff,
-                                        address: { ...editedStaff.address, city: text },
+                                        city: text,
                                     })
                                 }
                                 style={styles.input}
                             />
                             <TextInput
                                 placeholder="State"
-                                value={editedStaff.address?.state || ''}
+                                value={editedStaff.state || ''}
                                 onChangeText={(text) =>
                                     setEditedStaff({
                                         ...editedStaff,
-                                        address: { ...editedStaff.address, state: text },
+                                        state: text,
                                     })
                                 }
                                 style={styles.input}
                             />
                             <TextInput
                                 placeholder="ZIP Code"
-                                value={editedStaff.address?.zip || ''}
+                                value={editedStaff.zip || ''}
                                 onChangeText={(text) =>
                                     setEditedStaff({
                                         ...editedStaff,
-                                        address: { ...editedStaff.address, zip: text },
+                                        zip: text,
                                     })
                                 }
                                 style={styles.input}
                             />
                             <TextInput
                                 placeholder="Country"
-                                value={editedStaff.address?.country || ''}
+                                value={editedStaff.country || ''}
                                 onChangeText={(text) =>
                                     setEditedStaff({
                                         ...editedStaff,
-                                        address: { ...editedStaff.address, country: text },
+                                        country: text,
                                     })
                                 }
                                 style={styles.input}
                             />
                             <TouchableOpacity
                                 style={styles.saveButton}
-                                onPress={() => {
-                                    const updated = staffData.map(item =>
-                                        item.id === staff.id ? editedStaff : item
-                                    );
-                                    setStaffData(updated);
-                                    setEditModalVisible(false);
-                                    navigation.goBack();
-                                }}
+                                onPress={handleEditSave}
                             >
                                 <Text style={styles.saveButtonText}>Save</Text>
                             </TouchableOpacity>
@@ -156,7 +193,7 @@ export default function ProfileScreen({ route }) {
                 <View style={styles.topSection}>
                     <Image source={require('../assets/icons/user.png')} style={styles.avatar} />
                     <Text style={styles.name}>{staff.name}</Text>
-                    <Text style={styles.department}>{staff.department}</Text>
+                    <Text style={styles.department}>{staff.department.name}</Text>
                     <Text style={styles.reportsTo}>Reports to Carol White</Text>
                 </View>
                 {/* Contact Details Card */}
@@ -180,7 +217,7 @@ export default function ProfileScreen({ route }) {
                     <View style={styles.detailItem}>
                         <Image source={require('../assets/icons/location.png')} style={styles.detailIcon} />
                         <Text style={styles.detailText}>
-                            {staff.address.street}, {staff.address.city}, {staff.address.state} {staff.address.zip}, {staff.address.country}
+                            {staff.street}, {staff.city}, {staff.state} {staff.zip}, {staff.country}
                         </Text>
                     </View>
                 </View>
