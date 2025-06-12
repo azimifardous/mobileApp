@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TouchableWithoutFeedback } from 'react-native';
 import api from '../services/api';
-//  file for API calls
+
 export default function ProfileScreen({ route }) {
     const navigation = useNavigation();
     const { staff } = route.params;
@@ -49,6 +49,27 @@ export default function ProfileScreen({ route }) {
             });
     }
 
+    const handleDelete = () => {
+        Alert.alert(
+            "Delete Staff",
+            `Are you sure you want to delete ${editedStaff.name}?`,
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete", style: "destructive", onPress: () => {
+                        api.delete(`staff/${editedStaff.id}`)
+                            .then(() => {
+                                alert(`${editedStaff.name} has been deleted.`);
+                                navigation.navigate("Directory", { deleted: true });
+                            })
+                            .catch((err) => {
+                                alert("Failed to delete staff");
+                            });
+                    }
+                }
+            ]
+        );
+    }
 
     return (
         <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
@@ -67,27 +88,7 @@ export default function ProfileScreen({ route }) {
                         }}>
                             <Text style={styles.dropdownItem}>Edit</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => {
-                            Alert.alert(
-                                "Delete Staff",
-                                `Are you sure you want to delete ${editedStaff.name}?`,
-                                [
-                                    { text: "Cancel", style: "cancel" },
-                                    {
-                                        text: "Delete", style: "destructive", onPress: () => {
-                                            api.delete(`staff/${editedStaff.id}`)
-                                                .then(() => {
-                                                    alert(`${editedStaff.name} has been deleted.`);
-                                                    navigation.navigate("Directory", { deleted: true });
-                                                })
-                                                .catch((err) => {
-                                                    alert("Failed to delete staff");
-                                                });
-                                        }
-                                    }
-                                ]
-                            );
-                        }}>
+                        <TouchableOpacity onPress={handleDelete}>
                             <Text style={[styles.dropdownItem, { color: 'red' }]}>Delete</Text>
                         </TouchableOpacity>
                     </View>

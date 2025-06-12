@@ -1,27 +1,31 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, TextInput } from 'react-native';
+import api from '../services/api';
+import dayjs from 'dayjs';
 
 export default function HrScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [title, setTitle] = useState('');
-    const [date, setDate] = useState('');
-    const [requestType, setRequestType] = useState(activeTab);
-    const [staffRequests, setStaffRequests] = useState(requests);
+    const [staffRequests, setStaffRequests] = useState([]);
     const [activeTab, setActiveTab] = useState('Leave');
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [updatedStatus, setUpdatedStatus] = useState('');
 
-    const requests = [
-        { id: 1, type: 'Leave', title: 'Vacation', date: 'Mar 20, 2025', status: 'Approved' },
-        { id: 2, type: 'Leave', title: 'Sick Leave', date: 'Jan 07, 2025', status: 'Pending' },
-        { id: 3, type: 'Leave', title: 'Vacation', date: 'Feb 22, 2025', status: 'Rejected' },
-        // Add more entries for Training/Performance as needed
-    ];
+    useEffect(() => {
+        api.get('/hrRequest').then(response => {
+            setStaffRequests(response.data);
+        }
+        ).catch(error => {
+            console.error('Error fetching HR requests:', error);
+        });
+    }, []);
 
-    const filtered = requests.filter(req => req.type === activeTab);
+    const filtered = staffRequests.filter(req => req.type === activeTab);
 
     return (
         <View style={styles.container}>
             <Text style={styles.header}>HR Requests</Text>
-
             {/* Tabs */}
             <View style={styles.tabs}>
                 {['Leave', 'Training', 'Performance'].map(tab => (
@@ -42,14 +46,21 @@ export default function HrScreen() {
                     </TouchableOpacity>
                 ))}
             </View>
-
             {/* Requests List */}
             <ScrollView style={{ flex: 1 }}>
                 {filtered.map(req => (
-                    <View key={req.id} style={styles.card}>
+                    <TouchableOpacity
+                        key={req.id}
+                        style={styles.card}
+                        onPress={() => {
+                            setSelectedRequest(req);
+                            setUpdatedStatus(req.status);
+                            setEditModalVisible(true);
+                        }}
+                    >
                         <View>
                             <Text style={styles.cardTitle}>{req.title}</Text>
-                            <Text style={styles.cardDate}>{req.date}</Text>
+                            <Text style={styles.cardDate}>{dayjs(req.date).format("DD MMM YYYY")}</Text>
                         </View>
                         <Text style={[
                             styles.status,
@@ -59,10 +70,9 @@ export default function HrScreen() {
                         ]}>
                             {req.status}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
-
             {/* New Request Button */}
             <TouchableOpacity style={styles.newRequestButton} onPress={() => setModalVisible(true)}>
                 <Text style={styles.newRequestText}>＋ New Request</Text>
@@ -84,27 +94,31 @@ export default function HrScreen() {
                             style={styles.input}
                         />
 
-                        <TextInput
-                            placeholder="Date (e.g., Mar 20, 2025)"
-                            value={date}
-                            onChangeText={setDate}
-                            style={styles.input}
-                        />
-
                         <TouchableOpacity
                             style={styles.saveButton}
                             onPress={() => {
+                                const nowDate = new Date();
                                 const newRequest = {
-                                    id: Date.now(),
                                     type: activeTab,
                                     title,
-                                    date,
+                                    date: nowDate.toISOString(),
                                     status: 'Pending',
                                 };
-                                setStaffRequests([...staffRequests, newRequest]);
-                                setTitle('');
-                                setDate('');
-                                setModalVisible(false);
+
+                                api.post('/hrRequest', newRequest)
+                                    .then(res => {
+                                        setModalVisible(false);
+                                        setTitle('');
+
+                                        // Refresh request list
+                                        api.get('/hrRequest').then(response => {
+                                            setStaffRequests(response.data);
+                                        });
+
+                                    })
+                                    .catch(err => {
+                                        alert("Error submitting request");
+                                    });
                             }}
                         >
                             <Text style={styles.saveButtonText}>Submit Request</Text>
@@ -112,6 +126,73 @@ export default function HrScreen() {
 
                         <TouchableOpacity
                             onPress={() => setModalVisible(false)}
+                            style={styles.closeButton}
+                        >
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={editModalVisible}
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Update Status</Text>
+
+                        <Text style={{ marginBottom: 10, fontFamily: 'Trebuc MS' }}>
+                            {selectedRequest?.title}
+                        </Text>
+
+                        {/* Status Selector */}
+                        <Text>{updatedStatus}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
+                            {['Approved', 'Pending', 'Rejected'].map(status => (
+                                <TouchableOpacity
+                                    key={status}
+                                    style={{
+                                        backgroundColor: updatedStatus === status ? '#941a1d' : '#ccc',
+                                        padding: 8,
+                                        borderRadius: 8,
+                                        flex: 1,
+                                        marginHorizontal: 5,
+                                        alignItems: 'center',
+                                    }}
+                                    onPress={() => setUpdatedStatus(status)}
+                                >
+                                    <Text style={{ color: '#fff' }}>{status}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={() => {
+                                api.put(`/hrRequest/${selectedRequest.id}`, {
+                                    ...selectedRequest,
+                                    status: updatedStatus,
+                                })
+                                    .then(res => {
+                                        setEditModalVisible(false);
+                                        // Refresh data
+                                        api.get('/hrRequest').then(response => {
+                                            setStaffRequests(response.data);
+                                        });
+                                    })
+                                    .catch(err => {
+                                        console.error('Failed to update status:', err);
+                                        alert('Error updating request');
+                                    });
+                            }}
+                        >
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => setEditModalVisible(false)}
                             style={styles.closeButton}
                         >
                             <Text style={styles.closeButtonText}>✕</Text>

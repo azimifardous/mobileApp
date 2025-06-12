@@ -1,11 +1,12 @@
-// screens/HomeScreen.js
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-
 
 export default function HomeScreen({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Top Section */}
+            <View style={{ alignItems: 'center' }}>
+                <Image source={require('../assets/icons/logo.png')} style={{ height: 100, width: 100, objectFit: 'contain' }} />
+            </View>
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcome}>Welcome, John Doe</Text>
@@ -15,15 +16,13 @@ export default function HomeScreen({ navigation }) {
             </View>
             {/* Main Content */}
             <ScrollView>
-                <TouchableOpacity onPress={() => navigation.navigate('announcements')}>
-                    <View style={styles.announcementsContainer}>
-                        <Image source={require('../assets/icons/announcement.png')} style={{ width: 50, height: 50 }} />
-                        <View style={styles.announcements}>
-                            <Text style={styles.announcementsTitle}>Announcments</Text>
-                            <Text style={styles.announcementsSubtitle}>Staff Meeting at 10:00 AM today</Text>
-                        </View>
+                <View style={styles.announcementsContainer}>
+                    <Image source={require('../assets/icons/announcement.png')} style={{ width: 50, height: 50 }} />
+                    <View style={styles.announcements}>
+                        <Text style={styles.announcementsTitle}>Announcments</Text>
+                        <Text style={styles.announcementsSubtitle}>Staff Meeting at 10:00 AM today</Text>
                     </View>
-                </TouchableOpacity>
+                </View>
                 <TouchableOpacity onPress={() => navigation.navigate('Directory')}>
                     <View style={styles.card}>
                         <Image source={require('../assets/icons/staffDirectory.png')} style={{ width: 50, height: 50 }} />

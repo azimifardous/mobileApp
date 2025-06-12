@@ -1,21 +1,19 @@
-import React, { use, useEffect, useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, Image,
     ScrollView, Modal, TextInput
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
 import { SearchBar } from '@rneui/themed';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
-
-export default function StaffDirectoryScreen({ navigation, route }) {
+export default function StaffDirectoryScreen({ navigation }) {
     useFocusEffect(
         React.useCallback(() => {
             refreshStaffList();
         }, [])
     );
+
     useEffect(() => {
         api.get('/staff')
             .then(response => {
@@ -28,6 +26,7 @@ export default function StaffDirectoryScreen({ navigation, route }) {
         api.get('department')
             .then(res => setDepartments(res.data))
             .catch(err => console.error('Error fetching departments:', err));
+
     }, []);
 
     const [search, setSearch] = useState('');
@@ -42,8 +41,6 @@ export default function StaffDirectoryScreen({ navigation, route }) {
     const [zip, setZip] = useState('');
     const [country, setCountry] = useState('');
     const [staffData, setStaffData] = useState([]);
-
-
 
 
     const filteredStaff = staffData.filter((staff) =>
@@ -75,8 +72,6 @@ export default function StaffDirectoryScreen({ navigation, route }) {
             country,
         };
 
-        console.log('Adding new staff:', newStaff);
-
         api.post('staff', newStaff)
             .then(res => {
                 console.log('Staff saved:', res.data);
@@ -104,8 +99,6 @@ export default function StaffDirectoryScreen({ navigation, route }) {
             .catch(err => console.error('Error refreshing staff:', err));
     };
 
-
-
     return (
         <View style={styles.container}>
             {/* Top Section */}
@@ -123,7 +116,7 @@ export default function StaffDirectoryScreen({ navigation, route }) {
                 />
             </View>
 
-            {/* Main Content */}``
+            {/* Main Content */}
             <ScrollView>
                 {filteredStaff.map((staff) => (
                     <TouchableOpacity key={staff.id} onPress={() => navigation.navigate('Profile', { staff })}>
