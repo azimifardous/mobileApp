@@ -11,6 +11,10 @@ import ProfileScreen from './screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
+/**
+ * Starting entrypoint for mobile application (initialise variables here).
+ * @return {NavigationContainer}
+ */
 export default function App() {
   const [fontsLoaded] = useFonts({
     'Trebuc MS': require('./assets/fonts/trebuc.ttf'),
